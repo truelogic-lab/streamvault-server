@@ -9,6 +9,7 @@ import rateLimit from 'express-rate-limit';
 import authRoutes from './routes/auth.routes.js';
 import movieRoutes from './routes/movie.routes.js';
 import healthRoutes from './routes/health.routes.js';
+import adminRoutes from './routes/admin.routes.js';
 import { notFound, errorHandler } from './middleware/error.js';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(rateLimit({
 app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/movies', movieRoutes);
+app.use('/api/v1/admin', adminRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
