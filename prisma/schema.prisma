@@ -1,0 +1,114 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum SubscriptionStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+enum MovieType {
+  MOVIE
+  SERIES
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(USER)
+
+  subscription Subscription?
+  watchHistory WatchHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+}
+
+model Subscription {
+  id         String             @id @default(cuid())
+  userId     String             @unique
+  user       User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status     SubscriptionStatus @default(PENDING)
+  plan       String             @default("standard")
+  startedAt  DateTime?
+  expiresAt  DateTime?
+  approvedBy String?
+  notes      String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([status])
+}
+
+model Genre {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  movies Movie[] @relation("MovieGenres")
+}
+
+model Movie {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String?
+  tagline     String?
+  year        Int?
+  duration    String?
+  rating      Float?
+  type        MovieType @default(MOVIE)
+
+  posterUrl    String?
+  backdropUrl  String?
+  trailerUrl   String?
+
+  videoId       String?
+  videoStatus   String? @default("pending")
+  videoDuration Int?
+
+  featured  Boolean @default(false)
+  trending  Boolean @default(false)
+  published Boolean @default(true)
+
+  genres Genre[] @relation("MovieGenres")
+
+  watchHistory WatchHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published, trending])
+  @@index([published, featured])
+}
+
+model WatchHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  movieId     String
+  movie       Movie    @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  progressSec Int      @default(0)
+  durationSec Int      @default(0)
+  completed   Boolean  @default(false)
+  lastWatched DateTime @default(now())
+
+  @@unique([userId, movieId])
+  @@index([userId])
+}
