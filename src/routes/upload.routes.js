@@ -14,12 +14,6 @@ const upload = multer({
   },
 });
 
-router.post(
-  '/:bucket',
-  requireAuth,
-  requireAdmin,
-  upload.single('file'),
-  uploadImage
-);
+router.post('/:bucket', requireAuth, requireAdmin, upload.single('file'), uploadImage);
 
 export default router;

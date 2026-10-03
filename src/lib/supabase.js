@@ -4,7 +4,7 @@ const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) {
-  console.warn('[supabase] missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — uploads will fail');
+  console.warn('[supabase] SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY missing — uploads disabled');
 }
 
 export const supabase = url && key

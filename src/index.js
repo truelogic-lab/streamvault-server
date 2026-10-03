@@ -18,12 +18,18 @@ const PORT = process.env.PORT || 4000;
 
 app.set('trust proxy', 1);
 
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+/* CORS — reflect any origin, allow credentials.
+   Works with localhost, LAN IPs, and deployed frontends. */
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN
-    ? process.env.CLIENT_ORIGIN.split(',').map((s) => s.trim())
-    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
+  origin: true,
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-setup-secret'],
+}));
+
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+  contentSecurityPolicy: false,
 }));
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
@@ -31,7 +37,7 @@ app.use(morgan('dev'));
 
 app.use(rateLimit({
   windowMs: 60 * 1000,
-  max: 300,
+  max: 600,
   standardHeaders: true,
   legacyHeaders: false,
 }));
