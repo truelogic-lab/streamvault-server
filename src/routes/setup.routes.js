@@ -7,7 +7,6 @@ import { prisma } from '../lib/prisma.js';
 const router = Router();
 const execAsync = promisify(exec);
 
-// One-time setup. Protected by SETUP_SECRET env var.
 router.post('/bootstrap', async (req, res) => {
   const secret = req.headers['x-setup-secret'];
   if (!secret || secret !== process.env.SETUP_SECRET) {
@@ -15,16 +14,11 @@ router.post('/bootstrap', async (req, res) => {
   }
 
   try {
-    // 1. Sync schema (creates all tables)
-    const { stdout: pushOut, stderr: pushErr } = await execAsync(
-      'npx prisma db push --skip-generate'
-    );
+    const { stdout } = await execAsync('npx prisma db push --skip-generate');
 
-    // 2. Seed admin + genres
     const email = process.env.ADMIN_EMAIL;
     const password = process.env.ADMIN_PASSWORD;
     const name = process.env.ADMIN_NAME || 'Owner';
-
     const passwordHash = await bcrypt.hash(password, 12);
 
     const admin = await prisma.user.upsert({
@@ -52,8 +46,7 @@ router.post('/bootstrap', async (req, res) => {
 
     res.json({
       ok: true,
-      pushStdout: pushOut?.split('\n').slice(-5).join('\n'),
-      pushStderr: pushErr?.split('\n').slice(-5).join('\n'),
+      pushOutput: stdout?.split('\n').slice(-3).join('\n'),
       admin: admin.email,
     });
   } catch (e) {
