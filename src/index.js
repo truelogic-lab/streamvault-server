@@ -10,6 +10,7 @@ import authRoutes from './routes/auth.routes.js';
 import movieRoutes from './routes/movie.routes.js';
 import healthRoutes from './routes/health.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import uploadRoutes from './routes/upload.routes.js';
 import { notFound, errorHandler } from './middleware/error.js';
 
 const app = express();
@@ -19,7 +20,9 @@ app.set('trust proxy', 1);
 
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
-  origin: process.env.CLIENT_ORIGIN?.split(',') || ['http://localhost:5173'],
+  origin: process.env.CLIENT_ORIGIN
+    ? process.env.CLIENT_ORIGIN.split(',').map((s) => s.trim())
+    : ['http://localhost:5173', 'http://127.0.0.1:5173'],
   credentials: true,
 }));
 app.use(express.json({ limit: '2mb' }));
@@ -37,6 +40,7 @@ app.use('/api/v1/health', healthRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/movies', movieRoutes);
 app.use('/api/v1/admin', adminRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
